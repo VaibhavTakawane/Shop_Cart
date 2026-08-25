@@ -1,6 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+import axios from "axios";
+
+axios.defaults.baseURL =
+  process.env.REACT_APP_API_URL || "";
+
 /* REDUX */
 import { Provider } from "react-redux";
 
