@@ -42,15 +42,29 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = '__all__'
 
+
 class ProductSerializer(serializers.ModelSerializer):
-    reviews = serializers.SerializerMethodField(read_only= True)
+    reviews = serializers.SerializerMethodField(read_only=True)
+    image = serializers.SerializerMethodField()
+
     class Meta:
-        model = Product 
+        model = Product
         fields = '__all__'
 
-    def get_reviews(self,obj):
+    def get_image(self, obj):
+        if not obj.image:
+            return None
+
+        request = self.context.get("request")
+
+        if request:
+            return request.build_absolute_uri(obj.image.url)
+
+        return obj.image.url
+
+    def get_reviews(self, obj):
         reviews = obj.review_set.all()
-        serializer = ReviewSerializer(reviews,many=True)
+        serializer = ReviewSerializer(reviews, many=True)
         return serializer.data
 
 class ShippingAddressSerializer(serializers.ModelSerializer):
