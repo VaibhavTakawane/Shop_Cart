@@ -12,7 +12,9 @@ import reportWebVitals from "./reportWebVitals";
 
 /* STYLING */
 import "./index.css";
-import "./bootstrap.min.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+/* REDUX STORE */
 import store from "./redux/store/store";
 
 axios.defaults.baseURL =
