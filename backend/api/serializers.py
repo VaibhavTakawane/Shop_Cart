@@ -47,28 +47,20 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     reviews = serializers.SerializerMethodField(read_only=True)
-    image = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Product
         fields = '__all__'
 
     def get_image(self, obj):
-        request = self.context.get('request')
-
         if not obj.image:
             return None
 
         try:
-            image_url = obj.image.url
-
-            if request:
-                return request.build_absolute_uri(image_url)
-
-            return image_url
-
-        except ValueError:
-            return None
+            return self.context['request'].build_absolute_uri(obj.image.url)
+        except (KeyError, ValueError):
+            return obj.image.url
 
     def get_reviews(self, obj):
         reviews = obj.review_set.all()
