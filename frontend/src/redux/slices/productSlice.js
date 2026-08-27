@@ -148,15 +148,18 @@ export const createReview = (productId, review) => async (dispatch) => {
 export const fetchTopRatedProducts = () => async (dispatch) => {
   try {
     dispatch(productTopRequest());
-    const topRatedProducts = await productAPI.getTopRatedProducts();
+
+    const topRatedProducts =
+      await productAPI.getTopRatedProducts();
+
     dispatch(productTopSuccess(topRatedProducts));
   } catch (error) {
     dispatch(
-      productListFailure(
+      productTopFailure(
         error.response?.data?.detail ||
         error.response?.data?.message ||
         error.message ||
-        "Unable to load products"
+        "Unable to load top-rated products"
       )
     );
   }
