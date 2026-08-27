@@ -5,6 +5,10 @@
             "destination": "https://shop-cart-5hzu.onrender.com/api/:path*"
         },
         {
+            "source": "/media/:path*",
+            "destination": "https://shop-cart-5hzu.onrender.com/media/:path*"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }

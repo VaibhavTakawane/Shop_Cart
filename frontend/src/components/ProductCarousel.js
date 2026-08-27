@@ -18,7 +18,7 @@ function ProductCarousel() {
     error,
     loading,
     products = [],
-  } = topRatedProducts || {};
+  } = topRatedProducts;
 
   useEffect(() => {
     dispatch(fetchTopRatedProducts());
@@ -49,31 +49,32 @@ function ProductCarousel() {
       className="bg-dark"
       interval={5000}
     >
-      {products.map((product) => (
-        <Carousel.Item key={product._id}>
-          <Link to={`/product/${product._id}`}>
-            <Image
-              src={
-                product.image?.startsWith("http")
-                  ? product.image
-                  : `${process.env.REACT_APP_API_URL}${product.image}`
-              }
-              style={{
-                height: "250px",
-                width: "250px",
-                objectFit: "contain",
-              }}
-              alt={product.name}
-            />
+      {Array.isArray(products) &&
+        products.map((product) => (
+          <Carousel.Item key={product._id}>
+            <Link to={`/product/${product._id}`}>
+              <Image
+                src={
+                  product.image?.startsWith("http")
+                    ? product.image
+                    : `${process.env.REACT_APP_API_URL}${product.image}`
+                }
+                style={{
+                  height: "250px",
+                  width: "250px",
+                  objectFit: "contain",
+                }}
+                alt={product.name}
+              />
 
-            <Carousel.Caption className="carousel-caption">
-              <h4>
-                {product.name} (₹{product.price})
-              </h4>
-            </Carousel.Caption>
-          </Link>
-        </Carousel.Item>
-      ))}
+              <Carousel.Caption className="carousel-caption">
+                <h4>
+                  {product.name} (₹{product.price})
+                </h4>
+              </Carousel.Caption>
+            </Link>
+          </Carousel.Item>
+        ))}
     </Carousel>
   );
 }

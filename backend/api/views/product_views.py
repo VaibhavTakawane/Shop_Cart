@@ -1,14 +1,16 @@
-from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 
-from api.models import Product
+from api.models import Product, Review
 from api.serializers import ProductSerializer
 
 
+# =========================================================
+# Get all products
+# GET /api/products/
+# =========================================================
 @api_view(['GET'])
 def getProducts(request):
     products = Product.objects.all()
@@ -22,6 +24,10 @@ def getProducts(request):
     return Response(serializer.data)
 
 
+# =========================================================
+# Get single product
+# GET /api/products/<pk>/
+# =========================================================
 @api_view(['GET'])
 def getProduct(request, pk):
     try:
@@ -41,10 +47,12 @@ def getProduct(request, pk):
     return Response(serializer.data)
 
 
-# Top Products
+# =========================================================
+# Get top-rated products
+# GET /api/products/top/
+# =========================================================
 @api_view(['GET'])
 def getTopProducts(request):
-
     products = Product.objects.filter(
         rating__gte=4
     ).order_by('-rating')[:5]
@@ -58,61 +66,89 @@ def getTopProducts(request):
     return Response(serializer.data)
 
 
-# Get single products
-@api_view(['GET'])
-def getProduct(request, pk):
-
-    product = Product.objects.get(_id=pk)
-
-    serializer = ProductSerializer(
-        product,
-        many=False,
-        context={"request": request}
-    )
-
-    return Response(serializer.data)
-
-
+# =========================================================
+# Create product review
+# POST /api/products/<pk>/reviews/
+# =========================================================
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def createProductReview(request, pk):
+
+    # Get logged-in user
     user = request.user
-    product = Product.objects.get(_id=pk)
+
+    # Get product
+    try:
+        product = Product.objects.get(_id=pk)
+    except Product.DoesNotExist:
+        return Response(
+            {'detail': 'Product not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
     data = request.data
 
-    # 1 Review already exists
-    alreadyExists = product.review_set.filter(user=user).exists()
+    # =====================================================
+    # Check whether user already reviewed this product
+    # =====================================================
+    already_exists = product.review_set.filter(
+        user=user
+    ).exists()
 
-    if alreadyExists:
-        content = {'detail': 'Product already reviewed'}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    # 2 No Rating or 0
-    rating = int(data.get('rating', 0))
-    if rating == 0:
+    if already_exists:
         return Response(
-            {
-                'detail': 'Please select a rating'
-            },
-        status=status.HTTP_400_BAD_REQUEST
+            {'detail': 'Product already reviewed'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # =====================================================
+    # Get rating
+    # =====================================================
+    try:
+        rating = int(data.get('rating', 0))
+    except (TypeError, ValueError):
+        rating = 0
+
+    # Validate rating
+    if rating < 1 or rating > 5:
+        return Response(
+            {'detail': 'Please select a rating between 1 and 5'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # =====================================================
+    # Get comment
+    # =====================================================
+    comment = data.get('comment', '').strip()
+
+    # =====================================================
+    # Create review
+    # =====================================================
+    Review.objects.create(
+        user=user,
+        product=product,
+        name=user.first_name or user.username,
+        rating=rating,
+        comment=comment,
     )
 
-    # 3 Create review
+    # =====================================================
+    # Recalculate product reviews
+    # =====================================================
+    reviews = product.review_set.all()
+
+    product.numReviews = reviews.count()
+
+    total_rating = sum(review.rating for review in reviews)
+
+    if product.numReviews > 0:
+        product.rating = total_rating / product.numReviews
     else:
-        review = Review.objects.create(
-            user=user,
-            product=product,
-            name=user.first_name,
-            rating=rating,
-            comment=data.get('comment', ''),
-        )
-        reviews = product.review_set.all()
-        product.numReviews = len(reviews)
+        product.rating = 0
 
-        total = 0
+    product.save()
 
-        for i in reviews:
-            total += i.rating
-        product.rating = total / len(reviews)
-        product.save()
-        return Response('Review Added')
+    return Response(
+        {'detail': 'Review Added'},
+        status=status.HTTP_201_CREATED
+    )

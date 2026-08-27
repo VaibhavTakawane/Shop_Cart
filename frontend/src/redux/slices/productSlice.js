@@ -84,27 +84,41 @@ export const {
 export const fetchProductList =
   (keyword = "", pageNumber = "") =>
     async (dispatch) => {
-
       try {
-
         dispatch(productListRequest());
 
-        const productList =
-          await productAPI.getProductList(
-            keyword,
-            pageNumber
-          );
+        const data = await productAPI.getProductList(
+          keyword,
+          pageNumber
+        );
 
-        dispatch(productListSuccess(productList));
+        const products = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.products)
+            ? data.products
+            : [];
 
-      } catch (error) {
+        const page = Array.isArray(data)
+          ? 1
+          : data?.page || 1;
+
+        const pages = Array.isArray(data)
+          ? 1
+          : data?.pages || 1;
 
         dispatch(
+          productListSuccess({
+            products,
+            page,
+            pages,
+          })
+        );
+      } catch (error) {
+        dispatch(
           productListFailure(
-            error.response?.data?.detail ||
-            error.response?.data?.message ||
-            error.message ||
-            "Unable to load products"
+            error?.response?.data?.detail ||
+            error?.message ||
+            String(error)
           )
         );
       }
@@ -149,17 +163,21 @@ export const fetchTopRatedProducts = () => async (dispatch) => {
   try {
     dispatch(productTopRequest());
 
-    const topRatedProducts =
-      await productAPI.getTopRatedProducts();
+    const data = await productAPI.getTopRatedProducts();
 
-    dispatch(productTopSuccess(topRatedProducts));
+    const products = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.products)
+        ? data.products
+        : [];
+
+    dispatch(productTopSuccess(products));
   } catch (error) {
     dispatch(
       productTopFailure(
-        error.response?.data?.detail ||
-        error.response?.data?.message ||
-        error.message ||
-        "Unable to load top-rated products"
+        error?.response?.data?.detail ||
+        error?.message ||
+        String(error)
       )
     );
   }

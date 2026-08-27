@@ -1,27 +1,23 @@
 import axios from "axios";
-import { API_URL } from "../config";
+
+const API_URL = process.env.REACT_APP_API_URL || "";
 
 class ProductAPI {
 
   async getProductList(keyword = "", pageNumber = "") {
     try {
       const { data } = await axios.get(
-        `${API_URL}/api/products/`,
+        `${API_URL}/api/products/${keyword}`,
         {
           params: {
-            keyword,
-            page: pageNumber || 1,
+            page: pageNumber,
           },
         }
       );
 
       return data;
     } catch (error) {
-      throw new Error(
-        error.response?.data?.detail ||
-        error.message ||
-        "Unable to load products"
-      );
+      throw error;
     }
   }
 
