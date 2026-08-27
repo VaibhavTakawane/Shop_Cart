@@ -1,46 +1,40 @@
 import axios from "axios";
+import { API_URL } from "../config";
 
-const API_URL =
-  process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+const getAuthConfig = () => {
+  const userInfo = JSON.parse(
+    localStorage.getItem("userInfo") || "null"
+  );
+
+  return {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userInfo?.token || ""}`,
+    },
+  };
+};
 
 class UserAPI {
 
   async getUserDetails() {
     try {
-      const userInfo = JSON.parse(
-        localStorage.getItem("userInfo")
-      );
-
-      const token = userInfo?.token;
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
       const { data } = await axios.get(
         `${API_URL}/api/users/profile/`,
-        config
+        getAuthConfig()
       );
 
       return data;
-
     } catch (error) {
-      throw error;
+      throw new Error(
+        error.response?.data?.detail ||
+        error.message ||
+        "Unable to fetch user profile"
+      );
     }
   }
 
-
   async createUser(name, email, password) {
     try {
-
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-
       const { data } = await axios.post(
         `${API_URL}/api/users/register/`,
         {
@@ -48,87 +42,78 @@ class UserAPI {
           email,
           password,
         },
-        config
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       return data;
-
     } catch (error) {
-      throw error;
+      throw new Error(
+        error.response?.data?.detail ||
+        error.message ||
+        "Registration failed"
+      );
     }
   }
-
 
   async updateUser(userId, updateData) {
     try {
-
-      const userInfo = JSON.parse(
-        localStorage.getItem("userInfo")
-      );
-
-      const token = userInfo?.token;
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
       const { data } = await axios.put(
         `${API_URL}/api/users/profile/update/`,
         updateData,
-        config
+        getAuthConfig()
       );
 
       return data;
-
     } catch (error) {
-      throw error;
+      throw new Error(
+        error.response?.data?.detail ||
+        error.message ||
+        "Profile update failed"
+      );
     }
   }
-
 
   async deleteUser(userId) {
     try {
-
-      const userInfo = JSON.parse(
-        localStorage.getItem("userInfo")
-      );
-
-      const token = userInfo?.token;
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
       await axios.delete(
         `${API_URL}/api/users/delete/${userId}/`,
-        config
+        getAuthConfig()
       );
-
     } catch (error) {
-      throw error;
+      throw new Error(
+        error.response?.data?.detail ||
+        error.message ||
+        "Unable to delete account"
+      );
     }
   }
 
-
   async login(email, password) {
     try {
-
       const { data } = await axios.post(
         `${API_URL}/api/users/login/`,
         {
           username: email,
           password: password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
 
       return data;
-
     } catch (error) {
-      throw error;
+      throw new Error(
+        error.response?.data?.detail ||
+        error.message ||
+        "Login failed"
+      );
     }
   }
 }

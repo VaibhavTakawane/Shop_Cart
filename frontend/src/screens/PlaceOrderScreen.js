@@ -45,19 +45,20 @@ function PlaceOrderScreen({ history }) {
 
 
   // console.log(data)
-  const placeOrder = () => {
-    dispatch(createOrder(data))
-      .then(() => {
-        setTimeout(() => {
-          console.log(orderDetails)
-          history.push(`/orderDetail`);
-        }, 1000); // Delay of 1 second (1000 milliseconds)
-      })
-      .catch((error) => {
-        // Handle any error that occurred during order creation
-        toast.error("Failed to place order. Please try again.");
+  const placeOrder = async () => {
+    try {
+      const createdOrder = await dispatch(
+        createOrder(data)
+      );
 
-      });
+      history.push("/orderDetail");
+
+    } catch (error) {
+      toast.error(
+        error.message ||
+        "Failed to place order"
+      );
+    }
   };
 
   return (

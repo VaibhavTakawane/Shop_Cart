@@ -7,45 +7,58 @@ import Message from "../components/Message";
 import ProductCarousel from "../components/ProductCarousel";
 import { fetchProductList } from "../redux/slices/productSlice";
 import Paginate from "../components/Paginate";
-import { useParams } from "react-router-dom/cjs/react-router-dom.min";
+import { useParams } from "react-router-dom";
+
 function HomeScreen({ history }) {
+
   const dispatch = useDispatch();
-  const productList = useSelector((state) => state.product.productList);
-  const topRatedProducts = useSelector((state) => state.product.topRatedProducts);
 
-  const { products, loading, error, page, pages } = productList;
-  const { pageNumber } = useParams()
-  const { products: topProducts, loading: topLoading, error: topError } = topRatedProducts;
-  console.log(productList)
-  let keyword =
-    history.location
-      .search;
-  console.log(keyword)
+  const productList = useSelector(
+    (state) => state.product.productList
+  );
+
+  const {
+    products,
+    loading,
+    error,
+    page,
+    pages,
+  } = productList;
+
+  const { pageNumber } = useParams();
+
+  const params = new URLSearchParams(
+    history.location.search
+  );
+
+  const keyword = params.get("keyword") || "";
+
   useEffect(() => {
-    dispatch(fetchProductList(keyword, pageNumber));
-  }, [dispatch, keyword, pageNumber]);
-
+    dispatch(
+      fetchProductList(
+        keyword,
+        pageNumber || 1
+      )
+    );
+  }, [
+    dispatch,
+    keyword,
+    pageNumber,
+  ]);
 
   return (
     <div>
+
       {!keyword && (
         <>
-          <div style={{ fontWeight: "bold", fontSize: "25px", color: "black", fontFamily: "MozAnimationDelay" }}>TOP-RATED PRODUCTS</div>
+          <h2>TOP-RATED PRODUCTS</h2>
           <ProductCarousel />
         </>
       )}
 
-      <div
-        style={{
-          fontWeight: "bold",
-          fontSize: "25px",
-          color: "black",
-          fontFamily: "MozAnimationDelay",
-          marginTop: "10px",
-        }}
-      >
+      <h2 className="mt-3">
         LATEST PRODUCTS
-      </div>
+      </h2>
 
       {loading ? (
         <Loader />
@@ -53,7 +66,11 @@ function HomeScreen({ history }) {
         <Message variant="danger">
           {error}
         </Message>
-      ) : products?.length > 0 ? (
+      ) : products.length === 0 ? (
+        <Message variant="info">
+          No products found.
+        </Message>
+      ) : (
         <Row>
           {products.map((product) => (
             <Col
@@ -67,16 +84,17 @@ function HomeScreen({ history }) {
             </Col>
           ))}
         </Row>
-      ) : (
-        <Message variant="info">
-          No products found.
-        </Message>
       )}
-      <Paginate page={page} pages={pages} keyword={keyword} />
+
+      <Paginate
+        page={page}
+        pages={pages}
+        keyword={keyword}
+      />
+
     </div>
   );
 }
-
 
 export default HomeScreen;
 

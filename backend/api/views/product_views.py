@@ -1,62 +1,44 @@
-# Django Import
-from django.core import paginator
-from django.shortcuts import render
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-from rest_framework import status
-# Rest Framework Import
+from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from rest_framework.serializers import Serializer
+from rest_framework import status
 
-
-# Local Import
-# from api.products import products
-from api.models import *
+from api.models import Product
 from api.serializers import ProductSerializer
-
-# Get all the products with query
 
 
 @api_view(['GET'])
 def getProducts(request):
-
-    query = request.query_params.get('keyword', '')
-
-    products = Product.objects.filter(
-        name__icontains=query
-    ).order_by('-_id')
-
-    page_number = request.query_params.get('page', 1)
-
-    try:
-        page_number = int(page_number)
-    except (ValueError, TypeError):
-        page_number = 1
-
-    paginator = Paginator(products, 8)
-
-    try:
-        products_page = paginator.page(page_number)
-    except PageNotAnInteger:
-        products_page = paginator.page(1)
-        page_number = 1
-    except EmptyPage:
-        products_page = paginator.page(paginator.num_pages)
-        page_number = paginator.num_pages
+    products = Product.objects.all()
 
     serializer = ProductSerializer(
-        products_page,
+        products,
         many=True,
         context={'request': request}
     )
 
-    return Response({
-        'products': serializer.data,
-        'page': page_number,
-        'pages': paginator.num_pages
-    })
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def getProduct(request, pk):
+    try:
+        product = Product.objects.get(_id=pk)
+    except Product.DoesNotExist:
+        return Response(
+            {'detail': 'Product not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = ProductSerializer(
+        product,
+        many=False,
+        context={'request': request}
+    )
+
+    return Response(serializer.data)
 
 
 # Top Products
@@ -106,9 +88,14 @@ def createProductReview(request, pk):
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
     # 2 No Rating or 0
-    elif data['rating'] == 0:
-        content = {'detail': 'Please Select a rating'}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+    rating = int(data.get('rating', 0))
+    if rating == 0:
+        return Response(
+            {
+                'detail': 'Please select a rating'
+            },
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
     # 3 Create review
     else:
@@ -116,8 +103,8 @@ def createProductReview(request, pk):
             user=user,
             product=product,
             name=user.first_name,
-            rating=data['rating'],
-            comment=data['comment'],
+            rating=rating,
+            comment=data.get('comment', ''),
         )
         reviews = product.review_set.all()
         product.numReviews = len(reviews)

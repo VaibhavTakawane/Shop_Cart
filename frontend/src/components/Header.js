@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+
 import {
   AppBar,
   Toolbar,
@@ -8,23 +9,32 @@ import {
   MenuItem,
   Menu,
 } from "@material-ui/core";
-import { ShoppingCart, AccountCircle } from "@material-ui/icons";
+
+import {
+  ShoppingCart,
+  AccountCircle,
+} from "@material-ui/icons";
+
 import { makeStyles } from "@material-ui/core/styles";
+
 import SearchBox from "./SearchBox";
 import logo from "../logo.png";
+
 import { logout } from "../redux/slices/userSlice";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
     backgroundColor: "#212121",
-
   },
+
   grow: {
     flexGrow: 1,
   },
+
   menuItem: {
     minWidth: 180,
   },
+
   link: {
     textDecoration: "none",
     color: "#fff",
@@ -33,11 +43,15 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = () => {
   const classes = useStyles();
+
   const dispatch = useDispatch();
+  const history = useHistory();
+
   const userLogin = useSelector((state) => state.user);
   const { userDetails } = userLogin;
 
   const [anchorEl, setAnchorEl] = React.useState(null);
+
   const open = Boolean(anchorEl);
 
   const handleProfileMenuOpen = (event) => {
@@ -50,42 +64,49 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    console.log("hi")
     handleMenuClose();
-    window.location.reload(); // Reload the page
 
+    history.push("/");
   };
 
   return (
     <div className={classes.grow}>
-      <AppBar position="static" className={classes.appBar}  >
+      <AppBar
+        position="static"
+        className={classes.appBar}
+      >
         <Toolbar>
+
+          {/* LOGO */}
           <Link to="/" className={classes.link}>
             <img
               src={logo}
-              alt="FooTshop"
+              alt="ShopCart"
               style={{
                 height: 60,
               }}
             />
           </Link>
+
+          {/* SEARCH */}
           <div style={{ marginLeft: "5vw" }}>
             <SearchBox />
           </div>
+
           <div className={classes.grow} />
 
-          <div>
-            <IconButton
-              aria-label="show cart items"
-              color="inherit"
-              component={Link}
-              to="/cart"
-              style={{ color: "white" }}
-            >
-              <ShoppingCart />
-            </IconButton>
-          </div>
-          {console.log(userDetails)}
+          {/* CART */}
+          <IconButton
+            aria-label="show cart items"
+            color="inherit"
+            component={Link}
+            to="/cart"
+            style={{ color: "white" }}
+          >
+            <ShoppingCart />
+          </IconButton>
+
+          {/* ACCOUNT */}
           {userDetails ? (
             <>
               <IconButton
@@ -115,6 +136,7 @@ const Header = () => {
                 open={open}
                 onClose={handleMenuClose}
               >
+
                 <MenuItem
                   className={classes.menuItem}
                   component={Link}
@@ -124,24 +146,27 @@ const Header = () => {
                   Profile
                 </MenuItem>
 
-                <MenuItem className={classes.menuItem} onClick={handleLogout}>
+                <MenuItem
+                  className={classes.menuItem}
+                  onClick={handleLogout}
+                >
                   Logout
                 </MenuItem>
+
               </Menu>
             </>
           ) : (
-            <div>
-              <IconButton
-                aria-label="login"
-                color="inherit"
-                component={Link}
-                to="/login"
-                style={{ color: "white" }}
-              >
-                <AccountCircle />
-              </IconButton>
-            </div>
+            <IconButton
+              aria-label="login"
+              color="inherit"
+              component={Link}
+              to="/login"
+              style={{ color: "white" }}
+            >
+              <AccountCircle />
+            </IconButton>
           )}
+
         </Toolbar>
       </AppBar>
     </div>

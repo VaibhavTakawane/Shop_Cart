@@ -84,24 +84,34 @@ def getMyOrders(request):
     return Response(serializer.data)
 
 
- 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getOrderById(request, pk):
 
-    user = request.user
-
     try:
         order = Order.objects.get(_id=pk)
-        if   order.user == user:
-            serializer = OrderSerializer(order, many=False)
-            return Response(serializer.data)
-        else:
-            Response({'detail': 'Not Authorized  to view this order'},
-                     status=status.HTTP_400_BAD_REQUEST)
-    except:
-        return Response({'detail': 'Order does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+    except Order.DoesNotExist:
+        return Response(
+            {
+                'detail': 'Order does not exist'
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    if order.user != request.user:
+        return Response(
+            {
+                'detail': 'Not authorized to view this order'
+            },
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    serializer = OrderSerializer(
+        order,
+        many=False
+    )
+
+    return Response(serializer.data)
 
 
 @api_view(['PUT'])
@@ -113,3 +123,26 @@ def updateOrderToPaid(request, pk):
     order.save()
     return Response('Order was paid', status=status.HTTP_200_OK)
 
+
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def deliverOrder(request, pk):
+
+    try:
+        order = Order.objects.get(_id=pk)
+    except Order.DoesNotExist:
+        return Response(
+            {"detail": "Order not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    order.isDelivered = True
+    order.deliveredAt = datetime.now()
+    order.save()
+
+    serializer = OrderSerializer(
+        order,
+        many=False
+    )
+
+    return Response(serializer.data)

@@ -84,9 +84,10 @@ const userSlice = createSlice({
       state.error = action.payload;
     },
     logoutSuccess(state) {
-      state.userDetails = {};
+      state.userDetails = null;
       state.loading = false;
       state.error = null;
+
       localStorage.removeItem("userInfo");
     },
   },
@@ -121,13 +122,19 @@ export const login = (email, password) => async (dispatch) => {
   }
 };
 
-export const fetchUserDetails = (userId) => async (dispatch) => {
+export const fetchUserDetails = () => async (dispatch) => {
   try {
     dispatch(getUserDetailsStart());
-    const userDetails = await userAPI.getUserDetails( );
+
+    const userDetails = await userAPI.getUserDetails();
+
     dispatch(getUserDetailsSuccess(userDetails));
   } catch (error) {
-    dispatch(getUserDetailsFailure(error.message));
+    dispatch(
+      getUserDetailsFailure(
+        error.message || "Unable to fetch user details"
+      )
+    );
   }
 };
 
@@ -136,7 +143,7 @@ export const createUser = (name, email, password) => async (dispatch) => {
     dispatch(createUserStart());
     const user = await userAPI.createUser(name, email, password);
     dispatch(createUserSuccess(user));
-    dispatch(loginSuccess(user));  
+    dispatch(loginSuccess(user));
   } catch (error) {
     dispatch(createUserFailure(error.message));
   }
@@ -159,12 +166,12 @@ export const deleteUser = (userId) => async (dispatch) => {
     dispatch(deleteUserSuccess());
   } catch (error) {
     dispatch(deleteUserFailure(error.message));
-  } 
+  }
 
 };
 
 export const logout = () => (dispatch) => {
-  dispatch(userSlice.actions.logoutSuccess());
+  dispatch(logoutSuccess());
 };
 export const { reducer } = userSlice;
 export default userSlice;

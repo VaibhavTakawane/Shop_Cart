@@ -53,15 +53,15 @@ const orderSlice = createSlice({
       if (action.payload === 'Order was paid') {
         state.orderDetails.isPaid = true; // Update the 'isPaid' property of 'orderDetails'
       }
-    
+
       state.loading = false;
       state.error = null;
       console.log(action.payload);
       console.log(state.orderDetails);
-      
+
       return state; // Return the updated state
     },
-    
+
     payOrderFailure(state, action) {
       state.loading = false;
       state.error = action.payload;
@@ -136,13 +136,40 @@ export const {
 export const createOrder = (order) => async (dispatch) => {
   try {
     dispatch(createOrderStart());
+
     const createdOrder = await orderAPI.createOrder(order);
+
     dispatch(createOrderSuccess(createdOrder));
+
     localStorage.removeItem("cartItems");
+
+    return createdOrder;
+
   } catch (error) {
-    dispatch(createOrderFailure(error.message));
+
+    const message =
+      error.response?.data?.detail ||
+      error.message ||
+      "Failed to create order";
+
+    const getErrorMessage = (error) => {
+      return (
+        error?.response?.data?.detail ||
+        error?.message ||
+        String(error) ||
+        "Something went wrong"
+      );
+    };
+    dispatch(
+      createOrderFailure(
+        getErrorMessage(error)
+      )
+    );
+    throw new Error(message);
   }
 };
+
+
 
 export const getOrderDetails = (orderId) => async (dispatch) => {
   try {

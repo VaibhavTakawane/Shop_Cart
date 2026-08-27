@@ -1,122 +1,58 @@
 import axios from "axios";
+import { API_URL } from "../config";
 
-const API_URL =
-  process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+const getAuthConfig = () => {
+  const userInfo = JSON.parse(
+    localStorage.getItem("userInfo") || "null"
+  );
+
+  return {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userInfo?.token || ""}`,
+    },
+  };
+};
 
 class OrderAPI {
-  createOrder = async (order) => {
-    try {
-      const token = JSON.parse(localStorage.getItem("userInfo")).token;
 
-      const config = {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
+  async createOrder(order) {
+    const { data } = await axios.post(
+      `${API_URL}/api/orders/add/`,
+      order,
+      getAuthConfig()
+    );
 
-      const { data } = await axios.post(
-        `${API_URL}/api/orders/add/`, order, config);
+    return data;
+  }
 
-      return data;
-    } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
-    }
-  };
+  async getOrderDetails(id) {
+    const { data } = await axios.get(
+      `${API_URL}/api/orders/${id}/`,
+      getAuthConfig()
+    );
 
-  getOrderDetails = async (id) => {
-    try {
-      const token = JSON.parse(localStorage.getItem("userInfo")).token;
+    return data;
+  }
 
-      const config = {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
+  async payOrder(id, paymentResult) {
+    const { data } = await axios.put(
+      `${API_URL}/api/orders/${id}/pay/`,
+      paymentResult,
+      getAuthConfig()
+    );
 
-      const { data } = await axios.get(`${API_URL}/api/orders/${id}/`, config);
+    return data;
+  }
 
-      return data;
-    } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
-    }
-  };
+  async listMyOrders() {
+    const { data } = await axios.get(
+      `${API_URL}/api/orders/myorders/`,
+      getAuthConfig()
+    );
 
-  payOrder = async (id, paymentResult) => {
-    try {
-      const token = JSON.parse(localStorage.getItem("userInfo")).token;
-
-      const config = {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      const { data } = await axios.put(
-        `${API_URL}/api/orders/${id}/pay/`,
-        paymentResult,
-        config
-      );
-
-      return data;
-    } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
-    }
-  };
-
-  listMyOrders = async () => {
-    try {
-      const token = JSON.parse(localStorage.getItem("userInfo")).token;
-
-      const config = {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      const { data } = await axios.get(`${API_URL}/api/orders/myorders/`, config);
-
-      return data;
-    } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
-    }
-  };
-
-  deliverOrder = async (order) => {
-    try {
-      const token = JSON.parse(localStorage.getItem("userInfo")).token;
-
-      const config = {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      const { data } = await axios.put(
-        `${API_URL}/api/orders/${order._id}/deliver/`,
-        {},
-        config
-      );
-
-      return data;
-    } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
-    }
-  };
+    return data;
+  }
 }
 
 const orderAPI = new OrderAPI();
