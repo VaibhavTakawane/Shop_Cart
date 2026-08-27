@@ -54,13 +54,21 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_image(self, obj):
+        request = self.context.get('request')
+
         if not obj.image:
             return None
 
         try:
-            return self.context['request'].build_absolute_uri(obj.image.url)
-        except (KeyError, ValueError):
-            return obj.image.url
+            image_url = obj.image.url
+
+            if request:
+                return request.build_absolute_uri(image_url)
+
+            return image_url
+
+        except ValueError:
+            return None
 
     def get_reviews(self, obj):
         reviews = obj.review_set.all()

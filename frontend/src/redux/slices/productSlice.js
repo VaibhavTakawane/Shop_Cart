@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import productAPI from '../../mocks/product';
 
-const initialState = {   
+const initialState = {
   productList: { products: [], loading: false, error: null, page: 0, pages: 0 },
   productDetails: { product: { reviews: [] }, loading: false, error: null },
   createReview: { loading: false, error: null, success: false },
@@ -81,15 +81,34 @@ export const {
   productTopFailure,
 } = productSlice.actions;
 
-export const fetchProductList = (keyword ,pageNumber='') => async (dispatch) => {
-  try {
-    dispatch(productListRequest());
-    const productList = await productAPI.getProductList(keyword , pageNumber);
-    dispatch(productListSuccess(productList));
-  } catch (error) {
-    dispatch(productListFailure(error.response?.data.detail || error.message));
-  }
-};
+export const fetchProductList =
+  (keyword = "", pageNumber = "") =>
+    async (dispatch) => {
+
+      try {
+
+        dispatch(productListRequest());
+
+        const productList =
+          await productAPI.getProductList(
+            keyword,
+            pageNumber
+          );
+
+        dispatch(productListSuccess(productList));
+
+      } catch (error) {
+
+        dispatch(
+          productListFailure(
+            error.response?.data?.detail ||
+            error.response?.data?.message ||
+            error.message ||
+            "Unable to load products"
+          )
+        );
+      }
+    };
 
 export const fetchProductDetails = (id) => async (dispatch) => {
   try {
@@ -97,18 +116,32 @@ export const fetchProductDetails = (id) => async (dispatch) => {
     const productDetails = await productAPI.getProductDetails(id);
     dispatch(productDetailsSuccess(productDetails));
   } catch (error) {
-    dispatch(productDetailsFailure(error.response?.data.detail || error.message));
+    dispatch(
+      productListFailure(
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unable to load products"
+      )
+    );
   }
 };
 
 export const createReview = (productId, review) => async (dispatch) => {
   try {
     dispatch(createReviewRequest());
-    
-    await productAPI.createProductReview(productId, review );
+
+    await productAPI.createProductReview(productId, review);
     dispatch(createReviewSuccess());
   } catch (error) {
-    dispatch(createReviewFailure(error.response?.data.detail || error.message));
+    dispatch(
+      productListFailure(
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unable to load products"
+      )
+    );
   }
 };
 
@@ -118,7 +151,14 @@ export const fetchTopRatedProducts = () => async (dispatch) => {
     const topRatedProducts = await productAPI.getTopRatedProducts();
     dispatch(productTopSuccess(topRatedProducts));
   } catch (error) {
-    dispatch(productTopFailure(error.response?.data.detail || error.message));
+    dispatch(
+      productListFailure(
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        error.message ||
+        "Unable to load products"
+      )
+    );
   }
 };
 

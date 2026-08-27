@@ -35,21 +35,42 @@ function HomeScreen({ history }) {
         </>
       )}
 
-      <div style={{ fontWeight: "bold", fontSize: "25px", color: "black", fontFamily: "MozAnimationDelay" }}>LATEST PRODUCTS</div>
+      <div
+        style={{
+          fontWeight: "bold",
+          fontSize: "25px",
+          color: "black",
+          fontFamily: "MozAnimationDelay",
+          marginTop: "10px",
+        }}
+      >
+        LATEST PRODUCTS
+      </div>
+
       {loading ? (
         <Loader />
       ) : error ? (
-        <Message variant="danger">{error}</Message>
+        <Message variant="danger">
+          {error}
+        </Message>
+      ) : products?.length > 0 ? (
+        <Row>
+          {products.map((product) => (
+            <Col
+              key={product._id}
+              sm={12}
+              md={6}
+              lg={4}
+              xl={3}
+            >
+              <Product product={product} />
+            </Col>
+          ))}
+        </Row>
       ) : (
-        <div>
-          <Row>
-            {products.map((product) => (
-              <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
-                <Product product={product} />
-              </Col>
-            ))}
-          </Row>
-        </div>
+        <Message variant="info">
+          No products found.
+        </Message>
       )}
       <Paginate page={page} pages={pages} keyword={keyword} />
     </div>

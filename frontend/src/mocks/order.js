@@ -1,5 +1,8 @@
 import axios from "axios";
 
+const API_URL =
+  process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+
 class OrderAPI {
   createOrder = async (order) => {
     try {
@@ -12,7 +15,8 @@ class OrderAPI {
         },
       };
 
-      const { data } = await axios.post(`/api/orders/add/`, order, config);
+      const { data } = await axios.post(
+        `${API_URL}/api/orders/add/`, order, config);
 
       return data;
     } catch (error) {
@@ -33,7 +37,7 @@ class OrderAPI {
         },
       };
 
-      const { data } = await axios.get(`/api/orders/${id}/`, config);
+      const { data } = await axios.get(`${API_URL}/api/orders/${id}/`, config);
 
       return data;
     } catch (error) {
@@ -55,7 +59,7 @@ class OrderAPI {
       };
 
       const { data } = await axios.put(
-        `/api/orders/${id}/pay/`,
+        `${API_URL}/api/orders/${id}/pay/`,
         paymentResult,
         config
       );
@@ -79,7 +83,7 @@ class OrderAPI {
         },
       };
 
-      const { data } = await axios.get(`/api/orders/myorders/`, config);
+      const { data } = await axios.get(`${API_URL}/api/orders/myorders/`, config);
 
       return data;
     } catch (error) {
@@ -101,7 +105,7 @@ class OrderAPI {
       };
 
       const { data } = await axios.put(
-        `/api/orders/${order._id}/deliver/`,
+        `${API_URL}/api/orders/${order._id}/deliver/`,
         {},
         config
       );

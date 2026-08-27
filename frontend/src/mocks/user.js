@@ -1,9 +1,17 @@
-import axios from 'axios';
+import axios from "axios";
+
+const API_URL =
+  process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 class UserAPI {
-  async getUserDetails( ) {
+
+  async getUserDetails() {
     try {
-      const token = JSON.parse(localStorage.getItem("userInfo")).token;
+      const userInfo = JSON.parse(
+        localStorage.getItem("userInfo")
+      );
+
+      const token = userInfo?.token;
 
       const config = {
         headers: {
@@ -11,38 +19,54 @@ class UserAPI {
         },
       };
 
-      const { data } = await axios.get(`/api/users/`, config);
+      const { data } = await axios.get(
+        `${API_URL}/api/users/profile/`,
+        config
+      );
+
       return data;
+
     } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
+      throw error;
     }
   }
+
 
   async createUser(name, email, password) {
     try {
- 
+
       const config = {
         headers: {
-          'Content-Type': 'application/json',
-         
-        }
+          "Content-Type": "application/json",
+        },
       };
-  
-      const { data } = await axios.post('/api/users/register/', { name, email, password }, config);
+
+      const { data } = await axios.post(
+        `${API_URL}/api/users/register/`,
+        {
+          name,
+          email,
+          password,
+        },
+        config
+      );
+
       return data;
+
     } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
+      throw error;
     }
   }
-  
+
 
   async updateUser(userId, updateData) {
     try {
-      const token = JSON.parse(localStorage.getItem("userInfo")).token;
+
+      const userInfo = JSON.parse(
+        localStorage.getItem("userInfo")
+      );
+
+      const token = userInfo?.token;
 
       const config = {
         headers: {
@@ -50,18 +74,28 @@ class UserAPI {
         },
       };
 
-      const { data } = await axios.put(`/api/users/profile/update/`, updateData, config);
+      const { data } = await axios.put(
+        `${API_URL}/api/users/profile/update/`,
+        updateData,
+        config
+      );
+
       return data;
+
     } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
+      throw error;
     }
   }
+
 
   async deleteUser(userId) {
     try {
-      const token = JSON.parse(localStorage.getItem("userInfo")).token;
+
+      const userInfo = JSON.parse(
+        localStorage.getItem("userInfo")
+      );
+
+      const token = userInfo?.token;
 
       const config = {
         headers: {
@@ -69,22 +103,32 @@ class UserAPI {
         },
       };
 
-      await axios.delete(`/api/users/delete/${userId}/`, config);
+      await axios.delete(
+        `${API_URL}/api/users/delete/${userId}/`,
+        config
+      );
+
     } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
+      throw error;
     }
   }
 
+
   async login(email, password) {
     try {
-      const { data } = await axios.post('/api/users/login/',{ username: email, password: password });
+
+      const { data } = await axios.post(
+        `${API_URL}/api/users/login/`,
+        {
+          username: email,
+          password: password,
+        }
+      );
+
       return data;
+
     } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
+      throw error;
     }
   }
 }
