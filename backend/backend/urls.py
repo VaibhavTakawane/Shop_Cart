@@ -38,16 +38,20 @@ from django.conf import settings
 from django.views.static import serve
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),
+    path("admin/", admin.site.urls),
+
+    path("api/products/", include("api.urls.product_urls")),
+    path("api/users/", include("api.urls.user_urls")),
+    path("api/orders/", include("api.urls.order_urls")),
 ]
 
+# Serve media files
 urlpatterns += [
     re_path(
-        r'^media/(?P<path>.*)$',
+        r"^media/(?P<path>.*)$",
         serve,
         {
-            'document_root': settings.MEDIA_ROOT,
+            "document_root": settings.MEDIA_ROOT,
         },
     ),
 ]
