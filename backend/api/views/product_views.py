@@ -6,7 +6,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from rest_framework import status
 # Rest Framework Import
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated  
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
@@ -17,44 +17,62 @@ from api.models import *
 from api.serializers import ProductSerializer
 
 # Get all the products with query
+
+
 @api_view(['GET'])
 def getProducts(request):
-    query = request.query_params.get('keyword')
-    if query == None:
-        query = ''
 
-    products = Product.objects.filter(name__icontains=query).order_by('-_id')
-    page = request.query_params.get('page')
-    if page is None or page.strip() == '':
-        page = 1
-    else:
-        try:
-            page = int(page)
-        except ValueError:
-            page = 1
-    paginator = Paginator(products, 8)
-       
+    query = request.query_params.get('keyword', '')
+
+    products = Product.objects.filter(
+        name__icontains=query
+    ).order_by('-_id')
+
+    page_number = request.query_params.get('page', 1)
+
     try:
-        products = paginator.page(page)
+        page_number = int(page_number)
+    except (ValueError, TypeError):
+        page_number = 1
+
+    paginator = Paginator(products, 8)
+
+    try:
+        products_page = paginator.page(page_number)
     except PageNotAnInteger:
-        products = paginator.page(1)
+        products_page = paginator.page(1)
+        page_number = 1
     except EmptyPage:
-        products = paginator.page(paginator.num_pages)
+        products_page = paginator.page(paginator.num_pages)
+        page_number = paginator.num_pages
 
-    if page == None:
-        page = 1
-    page = int(page)
+    serializer = ProductSerializer(
+        products_page,
+        many=True,
+        context={'request': request}
+    )
 
-    serializer = ProductSerializer(products, many=True)
-    return Response({'products': serializer.data, 'page': page, 'pages': paginator.num_pages})
-
+    return Response({
+        'products': serializer.data,
+        'page': page_number,
+        'pages': paginator.num_pages
+    })
 
 
 # Top Products
 @api_view(['GET'])
 def getTopProducts(request):
-    products = Product.objects.filter(rating__gte=4).order_by('-rating')[0:5]
-    serializer = ProductSerializer(products, many=True)
+
+    products = Product.objects.filter(
+        rating__gte=4
+    ).order_by('-rating')[:5]
+
+    serializer = ProductSerializer(
+        products,
+        many=True,
+        context={'request': request}
+    )
+
     return Response(serializer.data)
 
 
@@ -72,7 +90,7 @@ def createProductReview(request, pk):
     user = request.user
     product = Product.objects.get(_id=pk)
     data = request.data
-    
+
     # 1 Review already exists
     alreadyExists = product.review_set.filter(user=user).exists()
 
@@ -104,4 +122,3 @@ def createProductReview(request, pk):
         product.rating = total / len(reviews)
         product.save()
         return Response('Review Added')
-    

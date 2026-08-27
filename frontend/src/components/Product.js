@@ -10,15 +10,19 @@ function Product({ product }) {
         <CardMedia
           component="img"
           sx={{ objectFit: "contain", maxHeight: 140 }}
-          image={product.image}
+          image={
+            product.image?.startsWith("http")
+              ? product.image
+              : `${process.env.REACT_APP_API_URL}${product.image}`
+          }
           alt={product.name}
         />
-        <CardContent style={{textAlign:"center" }}>
+        <CardContent style={{ textAlign: "center" }}>
           <Typography gutterBottom variant="h6" component="div">
             {product.name}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{display:'flex',flexDirection:"column", alignItems:'center' }} component="div">
-            <Rating 
+          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', flexDirection: "column", alignItems: 'center' }} component="div">
+            <Rating
               value={product.rating}
               text={`${product.numReviews} reviews`}
               color="#f8e825"

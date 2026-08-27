@@ -9,9 +9,9 @@ import { fetchTopRatedProducts } from "../redux/slices/productSlice";
 function ProductCarousel() {
   const dispatch = useDispatch();
   const topRatedProducts = useSelector((state) => state.product.topRatedProducts)
-  const { error, loading, products } = topRatedProducts ;
+  const { error, loading, products } = topRatedProducts;
   console.log(topRatedProducts)
-  
+
   useEffect(() => {
     dispatch(fetchTopRatedProducts());
   }, [dispatch]);
@@ -21,11 +21,19 @@ function ProductCarousel() {
   ) : error ? (
     <Message variant="danger">{error}</Message>
   ) : (
-    <Carousel style={{height:"300px"}} pause="hover" className="bg-dark" interval={5000}>
+    <Carousel style={{ height: "300px" }} pause="hover" className="bg-dark" interval={5000}>
       {products.map((product) => (
         <Carousel.Item key={product._id}>
           <Link to={`/product/${product._id}`}>
-            <Image src={product.image} style={{height:"250px",width:"250px"   }} alt={product.name} />
+            <Image
+              src={
+                product.image?.startsWith("http")
+                  ? product.image
+                  : `${process.env.REACT_APP_API_URL}${product.image}`
+              }
+              style={{ height: "250px", width: "250px" }}
+              alt={product.name}
+            />
             <Carousel.Caption className="carousel-caption">
               <h4>{product.name} (₹{product.price})</h4>
             </Carousel.Caption>

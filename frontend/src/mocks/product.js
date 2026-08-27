@@ -1,65 +1,74 @@
-import axios from 'axios';
+import axios from "axios";
+
+const API_URL =
+  process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 class ProductAPI {
-  async getProductList(keyword= '' , pageNumber = '') {
+  async getProductList(keyword = "", pageNumber = "") {
     try {
-      const { data } = await axios.get(`/api/products${keyword}`, {
-        params: {
-       
-          page: pageNumber
+      const { data } = await axios.get(
+        `${API_URL}/api/products${keyword}`,
+        {
+          params: {
+            page: pageNumber,
+          },
         }
-      });
+      );
+
       return data;
     } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
+      throw error.response?.data?.detail || error.message;
     }
   }
-  
+
   async getProductDetails(productId) {
     try {
-      const { data } = await axios.get(`/api/products/${productId}`);
-      console.log(data)
-      return data;      
+      const { data } = await axios.get(
+        `${API_URL}/api/products/${productId}/`
+      );
+
+      return data;
     } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
+      throw error.response?.data?.detail || error.message;
     }
   }
 
   async createProductReview(productId, review) {
     try {
-      const token = JSON.parse(localStorage.getItem("userInfo")).token;
+      const userInfo = JSON.parse(
+        localStorage.getItem("userInfo")
+      );
+
+      const token = userInfo?.token;
+
       const config = {
         headers: {
-          'Content-type': 'application/json',
+          "Content-type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       };
 
       const { data } = await axios.post(
-        `/api/products/${productId}/reviews/`,
+        `${API_URL}/api/products/${productId}/reviews/`,
         review,
         config
       );
+
       return data;
     } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
+      throw error.response?.data?.detail || error.message;
     }
   }
 
   async getTopRatedProducts() {
     try {
-      const { data } = await axios.get(`/api/products/top/`);
+      const { data } = await axios.get(
+        `${API_URL}/api/products/top/`
+      );
+
       return data;
     } catch (error) {
-      throw error.response && error.response.data.detail
-        ? error.response.data.detail
-        : error.message;
+      throw error.response?.data?.detail || error.message;
     }
   }
 }
