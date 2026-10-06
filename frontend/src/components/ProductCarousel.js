@@ -32,8 +32,6 @@ function ProductCarousel() {
     return <Message variant="danger">{error}</Message>;
   }
 
-  // IMPORTANT:
-  // Do not render Carousel when there are no products.
   if (!Array.isArray(products) || products.length === 0) {
     return (
       <Message variant="info">
@@ -44,37 +42,47 @@ function ProductCarousel() {
 
   return (
     <Carousel
-      style={{ height: "300px" }}
       pause="hover"
-      className="bg-dark"
+      className="top-rated-carousel"
       interval={5000}
     >
-      {Array.isArray(products) &&
-        products.map((product) => (
-          <Carousel.Item key={product._id}>
-            <Link to={`/product/${product._id}`}>
+      {products.map((product) => (
+        <Carousel.Item key={product._id}>
+
+          <Link to={`/product/${product._id}`}>
+            <div className="carousel-product">
+
               <Image
                 src={
                   product.image?.startsWith("http")
                     ? product.image
                     : `${process.env.REACT_APP_API_URL}${product.image}`
                 }
-                style={{
-                  height: "250px",
-                  width: "250px",
-                  objectFit: "contain",
-                }}
+                className="carousel-product-image"
                 alt={product.name}
               />
 
-              <Carousel.Caption className="carousel-caption">
+              <div className="carousel-product-info">
+                <span>TOP RATED</span>
+
                 <h4>
-                  {product.name} (₹{product.price})
+                  {product.name}
                 </h4>
-              </Carousel.Caption>
-            </Link>
-          </Carousel.Item>
-        ))}
+
+                <strong>
+                  ₹{product.price}
+                </strong>
+
+                <div className="carousel-cta">
+                  View Product →
+                </div>
+              </div>
+
+            </div>
+          </Link>
+
+        </Carousel.Item>
+      ))}
     </Carousel>
   );
 }

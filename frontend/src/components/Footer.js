@@ -1,17 +1,24 @@
 import React from "react";
-import { Container, Grid, Typography } from "@material-ui/core";
+import { Container } from "react-bootstrap";
 
 function Footer() {
   return (
-    <footer>
+    <footer className="site-footer">
       <Container>
-        <Grid container justifyContent="center">
-          <Grid item>
-            <Typography variant="body1" color="textSecondary" align="center">
-              Copyright &copy; ShopCart
-            </Typography>
-          </Grid>
-        </Grid>
+        <div className="footer-content">
+
+          <div>
+            <h5>ShopCart</h5>
+            <p>
+              Simple shopping. Great products.
+            </p>
+          </div>
+
+          <div className="footer-copy">
+            © {new Date().getFullYear()} ShopCart
+          </div>
+
+        </div>
       </Container>
     </footer>
   );

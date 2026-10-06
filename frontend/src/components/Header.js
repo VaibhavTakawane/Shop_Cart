@@ -22,22 +22,99 @@ import logo from "../logo.png";
 
 import { logout } from "../redux/slices/userSlice";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   appBar: {
-    backgroundColor: "#212121",
+    background:
+      "linear-gradient(135deg, #111827 0%, #1f2937 100%)",
+    boxShadow: "0 4px 18px rgba(0, 0, 0, 0.18)",
   },
 
-  grow: {
+  toolbar: {
+    minHeight: 70,
+    display: "flex",
+    alignItems: "center",
+    padding: "8px 20px",
+    gap: 8,
+
+    "@media (max-width: 700px)": {
+      minHeight: 112,
+      padding: "8px 12px",
+      flexWrap: "wrap",
+      alignContent: "center",
+    },
+  },
+
+  logoLink: {
+    display: "flex",
+    alignItems: "center",
+    flexShrink: 0,
+  },
+
+  logo: {
+    height: 56,
+    width: "auto",
+    display: "block",
+    transition: "transform 0.2s ease",
+
+    "&:hover": {
+      transform: "scale(1.04)",
+    },
+
+    "@media (max-width: 700px)": {
+      height: 46,
+    },
+
+    "@media (max-width: 380px)": {
+      height: 42,
+    },
+  },
+
+  searchContainer: {
+    width: "min(500px, 45vw)",
+    marginLeft: 25,
+
+    "@media (max-width: 900px)": {
+      width: "42vw",
+      marginLeft: 12,
+    },
+
+    "@media (max-width: 700px)": {
+      order: 3,
+      width: "100%",
+      marginLeft: 0,
+      marginTop: 4,
+      flexBasis: "100%",
+    },
+  },
+
+  spacer: {
     flexGrow: 1,
+
+    "@media (max-width: 700px)": {
+      display: "block",
+    },
+  },
+
+  iconButton: {
+    color: "#ffffff !important",
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    transition: "all 0.2s ease",
+
+    "&:hover": {
+      backgroundColor: "rgba(255,255,255,0.12)",
+      transform: "translateY(-2px)",
+    },
+
+    "@media (max-width: 700px)": {
+      width: 40,
+      height: 40,
+    },
   },
 
   menuItem: {
     minWidth: 180,
-  },
-
-  link: {
-    textDecoration: "none",
-    color: "#fff",
   },
 }));
 
@@ -65,111 +142,117 @@ const Header = () => {
   const handleLogout = () => {
     dispatch(logout());
     handleMenuClose();
-
     history.push("/");
   };
 
   return (
-    <div className={classes.grow}>
-      <AppBar
-        position="static"
-        className={classes.appBar}
-      >
-        <Toolbar>
+    <AppBar
+      position="static"
+      className={classes.appBar}
+    >
+      <Toolbar className={classes.toolbar}>
 
-          {/* LOGO */}
-          <Link to="/" className={classes.link}>
-            <img
-              src={logo}
-              alt="ShopCart"
-              style={{
-                height: 60,
-              }}
-            />
-          </Link>
+        {/* =========================
+            LOGO
+        ========================== */}
+        <Link
+          to="/"
+          className={classes.logoLink}
+        >
+          <img
+            src={logo}
+            alt="ShopCart"
+            className={classes.logo}
+          />
+        </Link>
 
-          {/* SEARCH */}
-          <div style={{ marginLeft: "5vw" }}>
-            <SearchBox />
-          </div>
+        {/* =========================
+            SEARCH
+        ========================== */}
+        <div className={classes.searchContainer}>
+          <SearchBox />
+        </div>
 
-          <div className={classes.grow} />
+        {/* =========================
+            SPACER
+        ========================== */}
+        <div className={classes.spacer} />
 
-          {/* CART */}
-          <IconButton
-            aria-label="show cart items"
-            color="inherit"
-            component={Link}
-            to="/cart"
-            style={{ color: "white" }}
-          >
-            <ShoppingCart />
-          </IconButton>
+        {/* =========================
+            CART
+        ========================== */}
+        <IconButton
+          aria-label="show cart items"
+          component={Link}
+          to="/cart"
+          className={classes.iconButton}
+        >
+          <ShoppingCart />
+        </IconButton>
 
-          {/* ACCOUNT */}
-          {userDetails ? (
-            <>
-              <IconButton
-                edge="end"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-                style={{ color: "white" }}
-              >
-                <AccountCircle />
-              </IconButton>
+        {/* =========================
+            ACCOUNT
+        ========================== */}
 
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={open}
-                onClose={handleMenuClose}
-              >
-
-                <MenuItem
-                  className={classes.menuItem}
-                  component={Link}
-                  to="/profile"
-                  onClick={handleMenuClose}
-                >
-                  Profile
-                </MenuItem>
-
-                <MenuItem
-                  className={classes.menuItem}
-                  onClick={handleLogout}
-                >
-                  Logout
-                </MenuItem>
-
-              </Menu>
-            </>
-          ) : (
+        {userDetails ? (
+          <>
             <IconButton
-              aria-label="login"
-              color="inherit"
-              component={Link}
-              to="/login"
-              style={{ color: "white" }}
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              className={classes.iconButton}
             >
               <AccountCircle />
             </IconButton>
-          )}
 
-        </Toolbar>
-      </AppBar>
-    </div>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={open}
+              onClose={handleMenuClose}
+            >
+
+              <MenuItem
+                className={classes.menuItem}
+                component={Link}
+                to="/profile"
+                onClick={handleMenuClose}
+              >
+                Profile
+              </MenuItem>
+
+              <MenuItem
+                className={classes.menuItem}
+                onClick={handleLogout}
+              >
+                Logout
+              </MenuItem>
+
+            </Menu>
+          </>
+        ) : (
+          <IconButton
+            aria-label="login"
+            component={Link}
+            to="/login"
+            className={classes.iconButton}
+          >
+            <AccountCircle />
+          </IconButton>
+        )}
+
+      </Toolbar>
+    </AppBar>
   );
 };
 
